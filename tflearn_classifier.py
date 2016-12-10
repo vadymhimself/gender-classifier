@@ -1,6 +1,7 @@
 import tflearn
 import tensorflow as tf
 import numpy as np
+from tflearn.data_utils import to_categorical
 
 # [height, weight, shoe_size]
 X = [[181, 80, 44], [177, 70, 43], [160, 60, 38], [154, 54, 37], [166, 65, 40],
@@ -10,7 +11,8 @@ X = [[181, 80, 44], [177, 70, 43], [160, 60, 38], [154, 54, 37], [166, 65, 40],
 # 0 - for female, 1 - for male
 Y = [1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 1, 0]
 
-data = np.column_stack((X, Y))
+# encode to one-hot vector and shuffle
+data = np.column_stack((X, to_categorical(Y, nb_classes=2)))
 np.random.shuffle(data)
 
 # Split into train and test set
@@ -21,8 +23,8 @@ X_test, Y_test = data[8:, :3], data[8:, 3:]
 net = tflearn.input_data(shape=[None, 3])
 net = tflearn.fully_connected(net, 32)
 net = tflearn.fully_connected(net, 32)
-net = tflearn.fully_connected(net, 1, activation='linear')
-net = tflearn.regression(net, loss='mean_square')
+net = tflearn.fully_connected(net, 2, activation='softmax')
+net = tflearn.regression(net)
 
 # fix for tflearn with TensorFlow 12:
 col = tf.get_collection(tf.GraphKeys.TRAINABLE_VARIABLES)
